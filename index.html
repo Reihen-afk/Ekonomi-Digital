@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eksplorasi Ekonomi Digital — Media Pembelajaran Interaktif SMA</title>
+
+  <!-- React 18 + Babel + Tailwind (CDN) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts: Plus Jakarta Sans (display) + Inter (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: { 950:'#06122B', 900:'#0A1F3C', 800:'#0E2A4F', 700:'#13355F' },
+            teal: { DEFAULT:'#2DD4BF', deep:'#14B8A6' },
+            emerald: { DEFAULT:'#10B981' },
+            gold: { DEFAULT:'#E2B85C' },
+            ivory: '#F7F9FC',
+          },
+          fontFamily: {
+            display: ['"Plus Jakarta Sans"', 'sans-serif'],
+            body: ['Inter', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    :root { color-scheme: light; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: #F7F9FC; }
+    h1,h2,h3,h4,.font-display { font-family: 'Plus Jakarta Sans', sans-serif; }
+    ::selection { background: #2DD4BF; color: #06122B; }
+
+    /* Grain overlay */
+    .grain::before {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      opacity: 0.035; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    @keyframes fadeUp { from { opacity:0; transform: translateY(28px);} to { opacity:1; transform: translateY(0);} }
+    @keyframes floatSlow { 0%,100% { transform: translateY(0)} 50% { transform: translateY(-18px)} }
+    @keyframes pulseGlow { 0%,100% { opacity:.5; transform: scale(1)} 50% { opacity:.85; transform: scale(1.08)} }
+    @keyframes scaleIn { from { opacity:0; transform: scale(.94)} to { opacity:1; transform: scale(1)} }
+    @keyframes shimmer { 100% { transform: translateX(100%)} }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+
+    .anim-fadeUp { opacity:0; animation: fadeUp .8s cubic-bezier(.16,1,.3,1) forwards; }
+    .anim-scaleIn { animation: scaleIn .45s cubic-bezier(.16,1,.3,1) forwards; }
+    .blob { animation: floatSlow 9s ease-in-out infinite; }
+    .glow { animation: pulseGlow 6s ease-in-out infinite; }
+    .shake { animation: shake .4s ease; }
+
+    .d1{animation-delay:.1s}.d2{animation-delay:.25s}.d3{animation-delay:.4s}
+    .d4{animation-delay:.55s}.d5{animation-delay:.7s}.d6{animation-delay:.85s}
+
+    .glass { background: rgba(255,255,255,0.7); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); border: 1px solid rgba(255,255,255,0.6); }
+    .glass-dark { background: rgba(10,31,60,0.55); backdrop-filter: blur(14px) saturate(140%); border: 1px solid rgba(45,212,191,0.18); }
+
+    .module-card { transition: transform .4s cubic-bezier(.16,1,.3,1), box-shadow .4s ease, border-color .4s ease; }
+    .module-card:hover { transform: translateY(-8px); box-shadow: 0 28px 60px -24px rgba(10,31,60,.45); }
+    .module-card:hover .mod-icon { transform: scale(1.08) rotate(-4deg); }
+    .module-card:hover .mod-arrow { transform: translateX(6px); opacity:1; }
+    .mod-icon { transition: transform .45s cubic-bezier(.16,1,.3,1); }
+    .mod-arrow { transition: transform .35s ease, opacity .35s ease; }
+
+    .btn-shimmer { position: relative; overflow: hidden; }
+    .btn-shimmer::after { content:""; position:absolute; top:0; left:-100%; width:100%; height:100%; background: linear-gradient(120deg, transparent, rgba(255,255,255,.35), transparent); }
+    .btn-shimmer:hover::after { animation: shimmer 1s ease; }
+
+    .quiz-opt { transition: all .25s ease; }
+    .quiz-opt:hover:not(:disabled) { transform: translateX(4px); }
+
+    .nice-scroll::-webkit-scrollbar { width: 8px; }
+    .nice-scroll::-webkit-scrollbar-thumb { background: rgba(20,184,166,.4); border-radius: 99px; }
+
+    /* range slider */
+    input[type=range].slider { -webkit-appearance:none; appearance:none; height:8px; border-radius:99px; background:#D8E2EC; outline:none; }
+    input[type=range].slider::-webkit-slider-thumb { -webkit-appearance:none; width:22px; height:22px; border-radius:50%; background:#14B8A6; border:3px solid #fff; box-shadow:0 2px 8px rgba(20,184,166,.5); cursor:pointer; transition:transform .15s; }
+    input[type=range].slider::-webkit-slider-thumb:hover { transform:scale(1.15); }
+    input[type=range].slider::-moz-range-thumb { width:22px; height:22px; border-radius:50%; background:#14B8A6; border:3px solid #fff; cursor:pointer; }
+
+    .num-input { transition: border-color .2s, box-shadow .2s; }
+    .num-input:focus { border-color:#14B8A6; box-shadow:0 0 0 4px rgba(20,184,166,.12); outline:none; }
+
+    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation:none !important; transition:none !important; } }
+  </style>
+</head>
+<body class="font-body text-navy-900 antialiased">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    /* ================= Icons ================= */
+    const ICONS = {
+      arrowRight:[['path',{d:'M5 12h14'}],['path',{d:'m12 5 7 7-7 7'}]],
+      arrowLeft:[['path',{d:'M19 12H5'}],['path',{d:'m12 19-7-7 7-7'}]],
+      arrowDown:[['path',{d:'M12 5v14'}],['path',{d:'m19 12-7 7-7-7'}]],
+      sparkles:[['path',{d:'M9.94 14.06A2 2 0 0 0 8.5 12.6l-5.6-1.45a.5.5 0 0 1 0-.96L8.5 8.74A2 2 0 0 0 9.94 7.3l1.45-5.6a.5.5 0 0 1 .96 0l1.45 5.6a2 2 0 0 0 1.44 1.44l5.6 1.45a.5.5 0 0 1 0 .96l-5.6 1.45a2 2 0 0 0-1.44 1.44l-1.45 5.6a.5.5 0 0 1-.96 0z'}],['path',{d:'M20 3v4'}],['path',{d:'M22 5h-4'}],['path',{d:'M4 17v2'}],['path',{d:'M5 18H3'}]],
+      bag:[['path',{d:'M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z'}],['path',{d:'M3 6h18'}],['path',{d:'M16 10a4 4 0 0 1-8 0'}]],
+      qr:[['rect',{width:'5',height:'5',x:'3',y:'3',rx:'1'}],['rect',{width:'5',height:'5',x:'16',y:'3',rx:'1'}],['rect',{width:'5',height:'5',x:'3',y:'16',rx:'1'}],['path',{d:'M21 16h-3a2 2 0 0 0-2 2v3'}],['path',{d:'M21 21v.01'}],['path',{d:'M12 7v3a2 2 0 0 1-2 2H7'}],['path',{d:'M3 12h.01'}],['path',{d:'M12 3h.01'}],['path',{d:'M12 16v.01'}],['path',{d:'M16 12h1'}],['path',{d:'M21 12v.01'}],['path',{d:'M12 21v-1'}]],
+      landmark:[['line',{x1:'3',x2:'21',y1:'22',y2:'22'}],['line',{x1:'6',x2:'6',y1:'18',y2:'11'}],['line',{x1:'10',x2:'10',y1:'18',y2:'11'}],['line',{x1:'14',x2:'14',y1:'18',y2:'11'}],['line',{x1:'18',x2:'18',y1:'18',y2:'11'}],['polygon',{points:'12 2 20 7 4 7'}]],
+      bitcoin:[['path',{d:'M11.77 19.09c4.92.87 6.14-6.02 1.22-6.89m-1.22 6.89L5.86 18.05m5.91 1.04-.35 1.97m1.56-8.86c4.92.87 6.14-6.03 1.22-6.9m-1.22 6.9-3.94-.69m5.16-6.2L8.29 4.26m5.91 1.04.35-1.97M7.48 20.36 10.6 2.64'}]],
+      checkCircle:[['circle',{cx:'12',cy:'12',r:'10'}],['path',{d:'m9 12 2 2 4-4'}]],
+      xCircle:[['circle',{cx:'12',cy:'12',r:'10'}],['path',{d:'m15 9-6 6'}],['path',{d:'m9 9 6 6'}]],
+      x:[['path',{d:'M18 6 6 18'}],['path',{d:'m6 6 12 12'}]],
+      cap:[['path',{d:'M21.42 10.92a1 1 0 0 0-.02-1.84L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.83l8.57 3.91a2 2 0 0 0 1.66 0z'}],['path',{d:'M22 10v6'}],['path',{d:'M6 12.5V16a6 3 0 0 0 12 0v-3.5'}]],
+      play:[['polygon',{points:'6 3 20 12 6 21 6 3'}]],
+      book:[['path',{d:'M12 7v14'}],['path',{d:'M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z'}]],
+      trending:[['polyline',{points:'22 7 13.5 15.5 8.5 10.5 2 17'}],['polyline',{points:'16 7 22 7 22 13'}]],
+      bulb:[['path',{d:'M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5'}],['path',{d:'M9 18h6'}],['path',{d:'M10 22h4'}]],
+      target:[['circle',{cx:'12',cy:'12',r:'10'}],['circle',{cx:'12',cy:'12',r:'6'}],['circle',{cx:'12',cy:'12',r:'2'}]],
+      zap:[['path',{d:'M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z'}]],
+      users:[['path',{d:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2'}],['circle',{cx:'9',cy:'7',r:'4'}],['path',{d:'M22 21v-2a4 4 0 0 0-3-3.87'}],['path',{d:'M16 3.13a4 4 0 0 1 0 7.75'}]],
+      rotate:[['path',{d:'M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8'}],['path',{d:'M3 3v5h5'}]],
+      chevR:[['path',{d:'m9 18 6-6-6-6'}]],
+      chart:[['path',{d:'M3 3v16a2 2 0 0 0 2 2h16'}],['path',{d:'M18 17V9'}],['path',{d:'M13 17V5'}],['path',{d:'M8 17v-3'}]],
+      calc:[['rect',{width:'16',height:'20',x:'4',y:'2',rx:'2'}],['line',{x1:'8',x2:'16',y1:'6',y2:'6'}],['line',{x1:'16',x2:'16',y1:'14',y2:'18'}],['path',{d:'M16 10h.01'}],['path',{d:'M12 10h.01'}],['path',{d:'M8 10h.01'}],['path',{d:'M12 14h.01'}],['path',{d:'M8 14h.01'}],['path',{d:'M12 18h.01'}],['path',{d:'M8 18h.01'}]],
+      video:[['path',{d:'m22 8-6 4 6 4V8Z'}],['rect',{width:'14',height:'12',x:'2',y:'6',rx:'2'}]],
+      menu:[['line',{x1:'4',x2:'20',y1:'6',y2:'6'}],['line',{x1:'4',x2:'20',y1:'12',y2:'12'}],['line',{x1:'4',x2:'20',y1:'18',y2:'18'}]],
+      search:[['circle',{cx:'11',cy:'11',r:'8'}],['path',{d:'m21 21-4.3-4.3'}]],
+      coins:[['circle',{cx:'8',cy:'8',r:'6'}],['path',{d:'M18.09 10.37A6 6 0 1 1 10.34 18'}],['path',{d:'M7 6h1v4'}],['path',{d:'m16.71 13.88.7.71-2.82 2.82'}]],
+      scale:[['path',{d:'m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z'}],['path',{d:'m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z'}],['path',{d:'M7 21h10'}],['path',{d:'M12 3v18'}],['path',{d:'M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2'}]],
+      globe:[['circle',{cx:'12',cy:'12',r:'10'}],['path',{d:'M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20'}],['path',{d:'M2 12h20'}]],
+      award:[['path',{d:'m15.48 12.89 1.51 8.52a.5.5 0 0 1-.81.47l-3.58-2.69a1 1 0 0 0-1.2 0l-3.59 2.69a.5.5 0 0 1-.81-.47l1.51-8.52'}],['circle',{cx:'12',cy:'8',r:'6'}]],
+      listCheck:[['path',{d:'m3 17 2 2 4-4'}],['path',{d:'m3 7 2 2 4-4'}],['path',{d:'M13 6h8'}],['path',{d:'M13 12h8'}],['path',{d:'M13 18h8'}]],
+      gauge:[['path',{d:'m12 14 4-4'}],['path',{d:'M3.34 19a10 10 0 1 1 17.32 0'}]],
+      link:[['path',{d:'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71'}],['path',{d:'M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71'}]],
+      percent:[['line',{x1:'19',x2:'5',y1:'5',y2:'19'}],['circle',{cx:'6.5',cy:'6.5',r:'2.5'}],['circle',{cx:'17.5',cy:'17.5',r:'2.5'}]],
+    };
+
+    function Icon({ name, size=24, stroke=2, className='' }) {
+      const node = ICONS[name];
+      if (!node) return null;
+      return (
+        <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" strokeWidth={stroke} strokeLinecap="round" strokeLinejoin="round" className={className}>
+          {node.map((c,i)=>React.createElement(c[0],{key:i,...c[1]}))}
+        </svg>
+      );
+    }
+
+    /* ================= Helpers ================= */
+    const rupiah = (n) => 'Rp ' + Math.round(n).toLocaleString('id-ID');
+    const shuffle = (a) => a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(p=>p[1]);
+
+    function Reveal({ children, className='', delay=0 }) {
+      const ref = useRef(null);
+      const [vis, setVis] = useState(false);
+      useEffect(() => {
+        const o = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setVis(true); o.disconnect(); } }, { threshold: 0.12 });
+        if (ref.current) o.observe(ref.current);
+        return () => o.disconnect();
+      }, []);
+      return (
+        <div ref={ref} className={className}
+          style={{ opacity: vis?1:0, transform: vis?'none':'translateY(28px)', transition:'opacity .7s cubic-bezier(.16,1,.3,1) '+delay+'s, transform .7s cubic-bezier(.16,1,.3,1) '+delay+'s' }}>
+          {children}
+        </div>
+      );
+    }
+
+    function Pill({ children, className='' }) {
+      return <span className={'inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide uppercase '+className}>{children}</span>;
+    }
+
+    function SectionHead({ pill, pillIcon, title, sub, light=false }) {
+      return (
+        <div className="text-center max-w-2xl mx-auto">
+          <Pill className={light ? 'glass-dark text-teal' : 'bg-teal/10 text-teal-deep'}><Icon name={pillIcon} size={14}/> {pill}</Pill>
+          <h2 className={'mt-5 font-display text-4xl md:text-5xl font-extrabold tracking-tight '+(light?'text-white':'text-navy-900')}>{title}</h2>
+          <p className={'mt-4 text-lg '+(light?'text-white/60':'text-navy-800/55')}>{sub}</p>
+        </div>
+      );
+    }
+
+    /* ================= Data ================= */
+    const MODULES = [
+      { id:'intro', no:'01', icon:'bag', title:'Pengantar Ekonomi Digital & E-Commerce', tag:'Fondasi', accent:'teal',
+        blurb:'Bagaimana ekonomi berpindah dari toko fisik ke layar genggam.',
+        points:['Definisi ekonomi digital dan ciri-cirinya','Model bisnis e-commerce: B2C, C2C, dan marketplace','Dampak digitalisasi terhadap pelaku UMKM Indonesia'],
+        quiz:{ q:'Manakah yang merupakan contoh aktivitas e-commerce?', options:['Membeli sayur di pasar tradisional dengan uang tunai','Memesan sepatu melalui aplikasi marketplace lalu membayar online','Menukar buku dengan teman sekelas','Menabung uang receh di celengan'], answer:1, why:'E-commerce adalah transaksi jual-beli barang/jasa secara elektronik melalui internet — seperti memesan dan membayar lewat marketplace.' } },
+      { id:'pay', no:'02', icon:'qr', title:'Transformasi Pembayaran (E-Wallet & QRIS)', tag:'Simulasi Interaktif', accent:'emerald', featured:true,
+        blurb:'Dari uang tunai ke satu kode QR yang menyatukan semua dompet digital.',
+        points:['Cara kerja e-wallet: top-up, saldo, dan transaksi','QRIS sebagai standar nasional satu kode untuk semua','Keamanan & manfaat pembayaran nirsentuh (cashless)'],
+        quiz:{ q:'Apa fungsi utama QRIS dalam sistem pembayaran digital?', options:['Menggantikan kartu identitas penduduk','Menyatukan berbagai e-wallet dalam satu kode QR standar','Menyimpan uang fisik di dalam ponsel','Menghitung bunga tabungan secara otomatis'], answer:1, why:'QRIS (Quick Response Code Indonesian Standard) menyatukan beragam penyedia e-wallet sehingga satu kode QR bisa menerima pembayaran dari aplikasi mana pun.' } },
+      { id:'fintech', no:'03', icon:'landmark', title:'Mengenal Financial Technology (Fintech)', tag:'Teknologi', accent:'gold',
+        blurb:'Inovasi yang membuat layanan keuangan lebih cepat, murah, dan inklusif.',
+        points:['Ragam fintech: pembayaran, pinjaman, investasi, asuransi','Peran fintech dalam inklusi keuangan masyarakat','Risiko & pentingnya legalitas (izin OJK)'],
+        quiz:{ q:'Manakah yang termasuk layanan fintech?', options:['Pinjaman online (P2P lending) yang terdaftar di OJK','Toko kelontong konvensional di pinggir jalan','Tawar-menawar harga di pasar loak','Menyimpan uang di bawah bantal'], answer:0, why:'Fintech adalah perpaduan layanan keuangan dengan teknologi. P2P lending (pinjam-meminjam online) adalah salah satu bentuk fintech yang diawasi OJK.' } },
+      { id:'crypto', no:'04', icon:'bitcoin', title:'Uang Kripto & Masa Depan Keuangan', tag:'Lanjutan', accent:'teal',
+        blurb:'Aset digital, blockchain, dan ke mana arah uang di masa depan.',
+        points:['Apa itu cryptocurrency dan bagaimana ia bernilai','Blockchain: buku besar yang transparan & terdistribusi','Peluang, volatilitas, dan regulasi aset kripto di Indonesia'],
+        quiz:{ q:'Teknologi apa yang menjadi dasar mata uang kripto seperti Bitcoin?', options:['Database tunggal milik satu bank pusat','Mesin ATM generasi terbaru','Blockchain — buku besar terdistribusi dan transparan','Jaringan televisi kabel'], answer:2, why:'Mata uang kripto berjalan di atas blockchain: catatan transaksi yang tersebar di banyak komputer, sehingga sulit dipalsukan dan tidak bergantung pada satu pihak.' } },
+    ];
+
+    const ACCENT = {
+      teal:{ text:'text-teal-deep', soft:'bg-teal/10', grad:'from-teal to-emerald', solid:'#14B8A6' },
+      emerald:{ text:'text-emerald', soft:'bg-emerald/10', grad:'from-emerald to-teal', solid:'#10B981' },
+      gold:{ text:'text-gold', soft:'bg-gold/10', grad:'from-gold to-teal', solid:'#E2B85C' },
+    };
+
+    const TOPICS = [
+      { icon:'globe', title:'Apa itu Ekonomi Digital?',
+        body:'Ekonomi digital adalah seluruh kegiatan ekonomi — produksi, distribusi, dan konsumsi — yang memanfaatkan teknologi internet dan perangkat digital. Transaksi yang dulu tatap muka kini bisa dilakukan online, kapan saja dan di mana saja.',
+        list:['Produksi: barang/jasa dibuat & dipasarkan lewat platform digital','Distribusi: marketplace, logistik online, dan aplikasi','Konsumsi: pembelian via e-commerce dan pembayaran digital'],
+        fact:'Ciri utama: tanpa batas ruang & waktu, data sebagai aset, dan biaya transaksi lebih rendah.' },
+      { icon:'bag', title:'E-Commerce & Marketplace',
+        body:'E-commerce adalah jual beli barang/jasa melalui internet. Model utamanya membedakan siapa yang berdagang dengan siapa.',
+        list:['B2C (Business to Consumer): perusahaan menjual ke konsumen','C2C (Consumer to Consumer): individu menjual ke individu lewat marketplace','B2B (Business to Business): perusahaan menjual ke perusahaan lain'],
+        fact:'Marketplace adalah "pasar digital" yang mempertemukan banyak penjual & pembeli dalam satu platform.' },
+      { icon:'qr', title:'Sistem Pembayaran Digital (Fintech)',
+        body:'Fintech (Financial Technology) menghadirkan cara pembayaran tanpa uang tunai yang praktis dan tercatat.',
+        list:['E-wallet / dompet digital (saldo elektronik di aplikasi)','QRIS — standar kode QR pembayaran nasional Indonesia','Mobile/Internet banking dan paylater (beli sekarang bayar nanti)'],
+        fact:'Manfaat: praktis, cepat, dan tercatat. Risiko: keamanan data & perilaku konsumtif.' },
+      { icon:'scale', title:'Peluang & Tantangan',
+        body:'Ekonomi digital membuka pintu besar, tetapi juga menuntut kita menjadi konsumen yang cerdas dan waspada.',
+        list:['Peluang: pasar lebih luas, UMKM go-online, lapangan kerja baru, efisiensi biaya','Tantangan: kesenjangan digital, keamanan siber & penipuan','Perlindungan data pribadi dan persaingan yang makin ketat'],
+        fact:'Bijak berekonomi digital = paham manfaat, sadar risiko, dan menjadi konsumen cerdas.' },
+    ];
+
+    const QUIZ_BANK = [
+      { q:'Kegiatan jual beli barang/jasa melalui internet disebut...', o:['Barter','E-commerce','Inflasi','Monopoli'], a:1, why:'E-commerce adalah transaksi jual-beli yang dilakukan secara elektronik melalui internet.' },
+      { q:'QRIS adalah standar nasional untuk...', o:['Pinjaman online','Kode QR pembayaran','Mata uang kripto','Pajak digital'], a:1, why:'QRIS menyatukan berbagai dompet digital dalam satu kode QR pembayaran standar.' },
+      { q:'Transaksi di marketplace antara individu dengan individu termasuk model...', o:['B2B','B2C','C2C','G2C'], a:2, why:'C2C = Consumer to Consumer, yaitu transaksi antar individu.' },
+      { q:'Berikut yang BUKAN manfaat ekonomi digital adalah...', o:['Pasar lebih luas','Biaya transaksi lebih rendah','Meningkatkan risiko penipuan online','UMKM bisa go-online'], a:2, why:'Risiko penipuan online justru merupakan tantangan, bukan manfaat.' },
+      { q:'Teknologi keuangan yang memungkinkan pembayaran tanpa uang tunai disebut...', o:['Fintech','Logistik','Manufaktur','Agraris'], a:0, why:'Fintech (Financial Technology) memungkinkan layanan keuangan tanpa uang tunai.' },
+      { q:'Teknologi yang menjadi dasar mata uang kripto seperti Bitcoin adalah...', o:['Cloud biasa','Blockchain','Database bank tunggal','Mesin ATM'], a:1, why:'Kripto berjalan di atas blockchain — buku besar terdistribusi dan transparan.' },
+    ];
+
+    const PAIRS = [
+      { id:'a', t:'E-wallet', d:'Dompet digital berisi saldo elektronik' },
+      { id:'b', t:'Marketplace', d:'Pasar digital yang mempertemukan penjual & pembeli' },
+      { id:'c', t:'B2C', d:'Perusahaan menjual langsung ke konsumen' },
+      { id:'d', t:'Paylater', d:'Beli sekarang, bayar nanti' },
+      { id:'e', t:'QRIS', d:'Standar kode QR pembayaran nasional' },
+    ];
+
+    /* ================= Navbar ================= */
+    const NAV = [['beranda','Beranda'],['materi','Materi'],['video','Video'],['simulasi','Simulasi'],['kuis','Kuis']];
+    function Navbar() {
+      const [scrolled, setScrolled] = useState(false);
+      const [open, setOpen] = useState(false);
+      const [active, setActive] = useState('beranda');
+      useEffect(() => {
+        const onScroll = () => {
+          setScrolled(window.scrollY > 24);
+          let cur = 'beranda';
+          NAV.forEach(([id]) => { const el = document.getElementById(id); if (el && window.scrollY >= el.offsetTop - 130) cur = id; });
+          setActive(cur);
+        };
+        window.addEventListener('scroll', onScroll); onScroll();
+        return () => window.removeEventListener('scroll', onScroll);
+      }, []);
+      const go = (id) => { setOpen(false); document.getElementById(id)?.scrollIntoView({ behavior:'smooth' }); };
+      return (
+        <nav className={'fixed top-0 inset-x-0 z-40 transition-all duration-500 '+(scrolled?'py-3':'py-5')}>
+          <div className={'mx-auto max-w-6xl px-5 flex items-center justify-between rounded-2xl transition-all duration-500 '+(scrolled?'glass shadow-lg shadow-navy-900/5 py-3':'py-2')}>
+            <button onClick={()=>go('beranda')} className="flex items-center gap-2.5 cursor-pointer">
+              <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-teal to-emerald text-navy-950 shadow-lg shadow-teal/30"><Icon name="zap" size={18} stroke={2.4}/></div>
+              <span className="font-display font-extrabold text-navy-900 text-lg tracking-tight">EkonomiDigital<span className="text-teal-deep">.id</span></span>
+            </button>
+            <div className="hidden md:flex items-center gap-1 text-sm font-medium">
+              {NAV.map(([id,label])=>(
+                <button key={id} onClick={()=>go(id)} className={'cursor-pointer rounded-full px-4 py-2 transition-colors '+(active===id?'bg-navy-900 text-white':'text-navy-800/70 hover:text-teal-deep')}>{label}</button>
+              ))}
+            </div>
+            <button onClick={()=>setOpen(o=>!o)} className="md:hidden grid h-10 w-10 place-items-center rounded-xl bg-navy-900/5 text-navy-900 cursor-pointer">
+              <Icon name={open?'x':'menu'} size={22}/>
+            </button>
+          </div>
+          {open && (
+            <div className="md:hidden mx-auto max-w-6xl px-5 mt-2 anim-scaleIn">
+              <div className="glass rounded-2xl p-2 shadow-xl flex flex-col">
+                {NAV.map(([id,label])=>(
+                  <button key={id} onClick={()=>go(id)} className={'cursor-pointer rounded-xl px-4 py-3 text-left font-medium '+(active===id?'bg-navy-900 text-white':'text-navy-800 hover:bg-teal/10')}>{label}</button>
+                ))}
+              </div>
+            </div>
+          )}
+        </nav>
+      );
+    }
+
+    /* ================= Hero ================= */
+    function Hero({ onStart }) {
+      return (
+        <header id="beranda" className="relative overflow-hidden grain bg-navy-950 text-white scroll-mt-0">
+          <div className="pointer-events-none absolute inset-0">
+            <div className="blob absolute -top-32 -left-24 h-[28rem] w-[28rem] rounded-full bg-teal/25 blur-[120px]"></div>
+            <div className="blob absolute top-20 right-0 h-[26rem] w-[26rem] rounded-full bg-emerald/20 blur-[130px]" style={{animationDelay:'2s'}}></div>
+            <div className="glow absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-gold/10 blur-[110px]"></div>
+            <div className="absolute inset-0 opacity-[0.07]" style={{backgroundImage:'linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px)',backgroundSize:'64px 64px'}}></div>
+          </div>
+          <div className="relative mx-auto max-w-6xl px-5 pt-40 pb-28 md:pt-48 md:pb-36">
+            <div className="max-w-3xl">
+              <div className="anim-fadeUp d1"><Pill className="glass-dark text-teal"><Icon name="sparkles" size={14}/> Media Pembelajaran Interaktif · Ekonomi SMA</Pill></div>
+              <h1 className="anim-fadeUp d2 mt-7 font-display text-5xl md:text-7xl font-extrabold leading-[1.05] tracking-tight">
+                Eksplorasi<span className="block bg-gradient-to-r from-teal via-emerald to-gold bg-clip-text text-transparent">Ekonomi Digital</span>
+              </h1>
+              <p className="anim-fadeUp d3 mt-6 max-w-xl text-lg md:text-xl text-white/65 leading-relaxed">
+                Baca materi, tonton video, mainkan simulasi pasar & kalkulator usaha, lalu uji pemahamanmu lewat kuis interaktif. Semua dalam satu tempat.
+              </p>
+              <div className="anim-fadeUp d4 mt-10 flex flex-wrap items-center gap-4">
+                <button onClick={onStart} className="btn-shimmer cursor-pointer group inline-flex items-center gap-2.5 rounded-full bg-gradient-to-r from-teal to-emerald px-7 py-4 font-display font-bold text-navy-950 shadow-xl shadow-teal/25 hover:shadow-teal/40 transition-shadow">
+                  <Icon name="play" size={18} stroke={2.5}/> Mulai Belajar <Icon name="arrowRight" size={18} stroke={2.5} className="transition-transform group-hover:translate-x-1"/>
+                </button>
+                <a href="#simulasi" className="cursor-pointer inline-flex items-center gap-2 rounded-full border border-white/15 px-6 py-4 font-semibold text-white/80 hover:bg-white/5 hover:text-white transition-colors"><Icon name="target" size={18}/> Coba Simulasi</a>
+              </div>
+              <div className="anim-fadeUp d5 mt-16 grid grid-cols-4 gap-6 max-w-xl">
+                {[['4','Modul'],['2','Simulasi'],['6','Soal Kuis'],['100%','Interaktif']].map(([n,l],i)=>(
+                  <div key={i}><div className="font-display text-3xl md:text-4xl font-extrabold text-white">{n}</div><div className="mt-1 text-xs md:text-sm text-white/50">{l}</div></div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="relative">
+            <svg viewBox="0 0 1440 80" className="block w-full" preserveAspectRatio="none"><path d="M0 80 L0 40 Q360 0 720 30 T1440 20 L1440 80 Z" fill="#F7F9FC"/></svg>
+          </div>
+        </header>
+      );
+    }
+
+    /* ================= Materi ================= */
+    function Accordion() {
+      const [open, setOpen] = useState(0);
+      return (
+        <div className="mt-12 max-w-3xl mx-auto space-y-3">
+          {TOPICS.map((t, i) => {
+            const isOpen = open === i;
+            return (
+              <Reveal key={i} delay={i*0.05}>
+                <div className={'rounded-2xl border bg-white overflow-hidden transition-all '+(isOpen?'border-teal/40 shadow-lg shadow-teal/5':'border-navy-900/10')}>
+                  <button onClick={()=>setOpen(isOpen?-1:i)} className="w-full flex items-center gap-4 px-5 py-4 text-left cursor-pointer">
+                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-teal to-emerald text-navy-950"><Icon name={t.icon} size={22} stroke={2.2}/></span>
+                    <span className="font-display font-bold text-navy-900 flex-1">{t.title}</span>
+                    <Icon name="chevR" size={20} className={'text-teal-deep transition-transform '+(isOpen?'rotate-90':'')}/>
+                  </button>
+                  <div className="grid transition-all duration-300" style={{gridTemplateRows:isOpen?'1fr':'0fr'}}>
+                    <div className="overflow-hidden">
+                      <div className="px-5 pb-5 pl-20">
+                        <p className="text-navy-800/70 leading-relaxed">{t.body}</p>
+                        <ul className="mt-3 space-y-2">
+                          {t.list.map((li,j)=>(
+                            <li key={j} className="flex items-start gap-2.5 text-sm text-navy-900">
+                              <span className="mt-1 grid h-4 w-4 shrink-0 place-items-center rounded-full bg-teal/15 text-teal-deep"><Icon name="chevR" size={11} stroke={3}/></span>{li}
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-gold/10 border-l-4 border-gold px-4 py-3 text-sm text-navy-900">
+                          <Icon name="bulb" size={18} className="text-gold shrink-0 mt-0.5"/><span>{t.fact}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+            );
+          })}
+        </div>
+      );
+    }
+
+    function Materi({ onOpen }) {
+      return (
+        <section id="materi" className="relative mx-auto max-w-6xl px-5 py-24 scroll-mt-20">
+          <SectionHead pill="Materi Pembelajaran" pillIcon="book" title="Empat Modul, Satu Perjalanan"
+            sub="Tersusun dari fondasi hingga masa depan keuangan. Klik kartu untuk membuka materi & kuis singkatnya, lalu dalami konsepnya di bawah." />
+          <div className="relative mt-16">
+            <div className="hidden lg:block absolute left-0 right-0 top-[4.5rem] h-px">
+              <svg className="w-full h-2" preserveAspectRatio="none" viewBox="0 0 1000 2"><line x1="0" y1="1" x2="1000" y2="1" stroke="#14B8A6" strokeWidth="2" strokeDasharray="6 8" opacity="0.35"/></svg>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+              {MODULES.map((m,i)=>{
+                const a = ACCENT[m.accent];
+                return (
+                  <Reveal key={m.id} delay={i*0.08}>
+                    <button onClick={()=>onOpen(m)} className={'module-card group relative text-left cursor-pointer w-full h-full rounded-3xl bg-white p-7 ring-1 ring-navy-900/5 shadow-xl shadow-navy-900/[0.04] '+(m.featured?'lg:-translate-y-3':'')}>
+                      {m.featured && <span className="absolute -top-3 left-7 rounded-full bg-gradient-to-r from-emerald to-teal px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-navy-950 shadow-lg">Simulasi ⚡</span>}
+                      <div className="flex items-center justify-between">
+                        <div className={'mod-icon grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br '+a.grad+' text-navy-950 shadow-lg'}><Icon name={m.icon} size={26} stroke={2.2}/></div>
+                        <span className="font-display text-4xl font-extrabold text-navy-900/[0.06]">{m.no}</span>
+                      </div>
+                      <h3 className="mt-6 font-display text-lg font-bold leading-snug text-navy-900">{m.title}</h3>
+                      <p className="mt-2 text-sm text-navy-800/55 leading-relaxed">{m.blurb}</p>
+                      <div className="mt-6 flex items-center justify-between">
+                        <span className={'rounded-full px-3 py-1 text-[11px] font-semibold '+a.soft+' '+a.text}>{m.tag}</span>
+                        <span className={'mod-arrow flex items-center gap-1 text-sm font-semibold opacity-60 '+a.text}>Buka <Icon name="arrowRight" size={16} stroke={2.4}/></span>
+                      </div>
+                    </button>
+                  </Reveal>
+                );
+              })}
+            </div>
+          </div>
+          <Accordion />
+        </section>
+      );
+    }
+
+    /* ================= Video Pembelajaran ================= */
+    function parseYouTube(url) {
+      if (!url) return null;
+      url = url.trim();
+      if (/^[A-Za-z0-9_-]{11}$/.test(url)) return url;
+      let m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|v\/))([A-Za-z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+    function VideoSection() {
+      const [input, setInput] = useState('');
+      const [vid, setVid] = useState(null);
+      const [err, setErr] = useState('');
+      const load = () => { const id = parseYouTube(input); if (id) { setVid(id); setErr(''); } else { setErr('Tautan tidak valid. Tempel link YouTube atau ID videonya.'); } };
+      const suggestions = [
+        { q:'apa itu ekonomi digital', label:'Apa itu Ekonomi Digital?' },
+        { q:'cara kerja QRIS pembayaran digital', label:'Cara Kerja QRIS' },
+        { q:'fintech adalah ekonomi SMA', label:'Mengenal Fintech' },
+      ];
+      return (
+        <section id="video" className="relative overflow-hidden grain bg-navy-950 text-white scroll-mt-20">
+          <div className="pointer-events-none absolute inset-0">
+            <div className="blob absolute -top-20 right-10 h-80 w-80 rounded-full bg-teal/20 blur-[120px]"></div>
+            <div className="blob absolute bottom-0 left-0 h-80 w-80 rounded-full bg-emerald/15 blur-[120px]" style={{animationDelay:'1.5s'}}></div>
+          </div>
+          <div className="relative mx-auto max-w-6xl px-5 py-24">
+            <SectionHead light pill="Video Pembelajaran" pillIcon="video" title="Tonton & Pahami Visualnya"
+              sub="Tempel tautan video YouTube favoritmu tentang ekonomi digital, atau pilih salah satu rekomendasi pencarian di bawah." />
+            <div className="mt-12 grid lg:grid-cols-5 gap-8 items-start">
+              <Reveal className="lg:col-span-3">
+                <div className="glass-dark rounded-3xl p-3 shadow-2xl">
+                  <div className="relative aspect-video rounded-2xl overflow-hidden bg-navy-900 ring-1 ring-white/10">
+                    {vid ? (
+                      <iframe className="absolute inset-0 h-full w-full" src={'https://www.youtube.com/embed/'+vid} title="Video Pembelajaran" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+                    ) : (
+                      <div className="absolute inset-0 grid place-items-center text-center px-6">
+                        <div>
+                          <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-teal to-emerald text-navy-950 shadow-lg"><Icon name="play" size={30} stroke={2.4}/></div>
+                          <p className="mt-4 font-display font-bold text-white">Belum ada video dimuat</p>
+                          <p className="mt-1 text-sm text-white/50 max-w-xs mx-auto">Tempel tautan YouTube di bawah lalu klik "Tampilkan".</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Reveal>
+              <Reveal className="lg:col-span-2" delay={0.1}>
+                <div className="glass-dark rounded-3xl p-6">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-teal"><Icon name="link" size={16}/> Tautan Video YouTube</label>
+                  <div className="mt-3 flex gap-2">
+                    <input value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&load()} placeholder="https://youtu.be/..." className="num-input flex-1 rounded-xl bg-navy-900/60 border border-white/15 px-4 py-3 text-sm text-white placeholder-white/30"/>
+                    <button onClick={load} className="cursor-pointer rounded-xl bg-gradient-to-r from-teal to-emerald px-5 font-display font-bold text-navy-950 hover:brightness-105 transition">Tampilkan</button>
+                  </div>
+                  {err && <p className="mt-2 text-sm text-red-300">{err}</p>}
+                  <div className="mt-6 h-px bg-white/10"></div>
+                  <p className="mt-5 text-sm font-semibold text-white/70">Rekomendasi pencarian</p>
+                  <div className="mt-3 space-y-2">
+                    {suggestions.map((s,i)=>(
+                      <a key={i} href={'https://www.youtube.com/results?search_query='+encodeURIComponent(s.q)} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-xl bg-navy-900/50 border border-white/10 px-4 py-3 text-sm text-white/80 hover:border-teal/40 hover:text-white transition cursor-pointer">
+                        <Icon name="search" size={16} className="text-teal shrink-0"/><span className="flex-1">{s.label}</span><Icon name="arrowRight" size={14} className="opacity-50"/>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </Reveal>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    /* ================= Curve Studio (slider) ================= */
+    function CurveStudio() {
+      const [dem, setDem] = useState(0);
+      const [sup, setSup] = useState(0);
+      const ref = useRef(null);
+      const a = 360 + dem*2, b = 0.9, c = 60 - sup*2, d = 0.9;
+      let Q = (a-c)/(b+d); let P = a-b*Q;
+      Q = Math.max(0, Math.min(400, Q)); P = Math.max(0, Math.min(400, P));
+      const priceRp = Math.round(P*250);
+      let status = 'Seimbang', stColor = 'text-navy-800';
+      if (dem>10){status='Permintaan tinggi 📈';stColor='text-emerald';} else if (dem<-10){status='Permintaan turun 📉';stColor='text-red-500';}
+      else if (sup>10){status='Banyak penjual 🏪';stColor='text-teal-deep';} else if (sup<-10){status='Penjual sedikit ⚠️';stColor='text-gold';}
+      useEffect(() => {
+        const cv = ref.current; if (!cv) return;
+        const ctx = cv.getContext('2d'); const W=cv.width, H=cv.height, m=54;
+        ctx.clearRect(0,0,W,H);
+        ctx.strokeStyle='#EAF0F6'; ctx.lineWidth=1;
+        for (let i=1;i<8;i++){ const x=m+(i/8)*(W-2*m); ctx.beginPath(); ctx.moveTo(x,m); ctx.lineTo(x,H-m); ctx.stroke(); const y=m+(i/8)*(H-2*m); ctx.beginPath(); ctx.moveTo(m,y); ctx.lineTo(W-m,y); ctx.stroke(); }
+        ctx.strokeStyle='#94A3B8'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(m,m); ctx.lineTo(m,H-m); ctx.lineTo(W-m,H-m); ctx.stroke();
+        ctx.fillStyle='#64748B'; ctx.font='600 13px Inter,sans-serif';
+        ctx.fillText('Harga (P)', m-40, m-16); ctx.fillText('Jumlah (Q)', W-m-66, H-m+32);
+        const x2=q=>m+(q/400)*(W-2*m), y2=p=>H-m-(p/400)*(H-2*m);
+        ctx.strokeStyle='#14B8A6'; ctx.lineWidth=3.5; ctx.beginPath(); ctx.moveTo(x2(0),y2(a)); ctx.lineTo(x2(400),y2(a-b*400)); ctx.stroke();
+        ctx.fillStyle='#14B8A6'; ctx.fillText('Permintaan', x2(300), y2(a-b*300)-10);
+        ctx.strokeStyle='#0A1F3C'; ctx.beginPath(); ctx.moveTo(x2(0),y2(c)); ctx.lineTo(x2(400),y2(c+d*400)); ctx.stroke();
+        ctx.fillStyle='#0A1F3C'; ctx.fillText('Penawaran', x2(280), y2(c+d*280)+22);
+        ctx.setLineDash([5,6]); ctx.strokeStyle='#E2B85C'; ctx.lineWidth=2; ctx.beginPath(); ctx.moveTo(m,y2(P)); ctx.lineTo(x2(Q),y2(P)); ctx.lineTo(x2(Q),H-m); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle='#E2B85C'; ctx.beginPath(); ctx.arc(x2(Q),y2(P),8,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(x2(Q),y2(P),3,0,Math.PI*2); ctx.fill();
+      }, [dem, sup]);
+      return (
+        <Reveal>
+          <div className="rounded-3xl bg-white ring-1 ring-navy-900/5 shadow-xl shadow-navy-900/[0.05] overflow-hidden">
+            <div className="bg-gradient-to-r from-teal to-emerald px-7 py-5 text-navy-950 flex items-center gap-3">
+              <div className="grid h-11 w-11 place-items-center rounded-xl bg-navy-950/15"><Icon name="chart" size={24} stroke={2.2}/></div>
+              <div><h3 className="font-display text-xl font-extrabold">Curve Studio</h3><p className="text-sm font-medium opacity-80">Simulasi keseimbangan pasar digital</p></div>
+            </div>
+            <div className="grid md:grid-cols-5 gap-6 p-7">
+              <div className="md:col-span-3">
+                <canvas ref={ref} width="640" height="430" className="w-full rounded-2xl bg-[#FBFDFF] ring-1 ring-navy-900/5"></canvas>
+                <p className="mt-3 text-center text-xs text-navy-800/50">Geser slider untuk melihat titik keseimbangan ⬤ bergerak.</p>
+              </div>
+              <div className="md:col-span-2">
+                <div className="space-y-5">
+                  <div>
+                    <div className="flex justify-between text-sm font-semibold text-navy-900"><span>Selera konsumen</span><span className="text-teal-deep">{dem>0?'+':''}{dem}</span></div>
+                    <input type="range" min="-40" max="40" value={dem} onChange={e=>setDem(+e.target.value)} className="slider w-full mt-2"/>
+                  </div>
+                  <div>
+                    <div className="flex justify-between text-sm font-semibold text-navy-900"><span>Jumlah penjual</span><span className="text-teal-deep">{sup>0?'+':''}{sup}</span></div>
+                    <input type="range" min="-40" max="40" value={sup} onChange={e=>setSup(+e.target.value)} className="slider w-full mt-2"/>
+                  </div>
+                </div>
+                <div className="mt-6 space-y-2">
+                  <div className="flex justify-between border-b border-dashed border-navy-900/10 py-2 text-sm"><span className="text-navy-800/60">Harga keseimbangan</span><b className="text-navy-900">{rupiah(priceRp)}</b></div>
+                  <div className="flex justify-between border-b border-dashed border-navy-900/10 py-2 text-sm"><span className="text-navy-800/60">Jumlah keseimbangan</span><b className="text-navy-900">{Math.round(Q)} unit</b></div>
+                  <div className="flex justify-between py-2 text-sm"><span className="text-navy-800/60">Status pasar</span><b className={stColor}>{status}</b></div>
+                </div>
+                <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-teal/10 px-4 py-3 text-sm text-navy-900">
+                  <Icon name="bulb" size={18} className="text-teal-deep shrink-0 mt-0.5"/><span>Permintaan naik → harga & jumlah naik. Penjual bertambah → harga turun, jumlah naik.</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      );
+    }
+
+    /* ================= Real Market (calculator) ================= */
+    function Field({ label, value, set, prefix }) {
+      return (
+        <div>
+          <label className="block text-sm font-semibold text-navy-900 mb-1.5">{label}</label>
+          <div className="relative">
+            {prefix && <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-navy-800/40">{prefix}</span>}
+            <input type="number" value={value} onChange={e=>set(e.target.value===''?0:+e.target.value)} className={'num-input w-full rounded-xl border border-navy-900/15 bg-white py-2.5 text-sm text-navy-900 '+(prefix?'pl-9 pr-3':'px-3')}/>
+          </div>
+        </div>
+      );
+    }
+    function MarketSim() {
+      const [price,setPrice]=useState(75000),[cost,setCost]=useState(40000),[fixed,setFixed]=useState(500000),[ads,setAds]=useState(300000),[qty,setQty]=useState(60);
+      const rev=price*qty, totCost=cost*qty+fixed+ads, profit=rev-totCost, margin=price-cost;
+      const bep = margin>0 ? Math.ceil((fixed+ads)/margin) : null;
+      const win = profit>=0;
+      let tip;
+      if (margin<=0) tip='⚠️ Harga jual ≤ biaya produksi! Rugi tiap unit. Naikkan harga atau tekan biaya.';
+      else if (profit<0) tip='📉 Masih rugi. Jual minimal '+bep+' unit agar balik modal (BEP).';
+      else tip='✅ Untung! Tiap unit di atas BEP menambah laba '+rupiah(margin)+'.';
+      return (
+        <Reveal delay={0.1}>
+          <div className="rounded-3xl bg-white ring-1 ring-navy-900/5 shadow-xl shadow-navy-900/[0.05] overflow-hidden">
+            <div className="bg-gradient-to-r from-navy-900 to-navy-800 px-7 py-5 text-white flex items-center gap-3">
+              <div className="grid h-11 w-11 place-items-center rounded-xl bg-white/10"><Icon name="calc" size={24} stroke={2.2}/></div>
+              <div><h3 className="font-display text-xl font-extrabold">Real Market</h3><p className="text-sm font-medium text-white/70">Kalkulator untung-rugi toko online</p></div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-7 p-7">
+              <div className="space-y-3.5">
+                <span className="inline-block rounded-full bg-teal/10 text-teal-deep text-xs font-bold uppercase tracking-wide px-3 py-1">Atur Tokomu</span>
+                <Field label="Harga jual / unit" value={price} set={setPrice} prefix="Rp"/>
+                <Field label="Biaya produksi / unit" value={cost} set={setCost} prefix="Rp"/>
+                <Field label="Biaya tetap / bulan (sewa, internet)" value={fixed} set={setFixed} prefix="Rp"/>
+                <Field label="Biaya iklan digital / bulan" value={ads} set={setAds} prefix="Rp"/>
+                <Field label="Perkiraan unit terjual / bulan" value={qty} set={setQty}/>
+              </div>
+              <div>
+                <span className="inline-block rounded-full bg-teal/10 text-teal-deep text-xs font-bold uppercase tracking-wide px-3 py-1">Laporan Usaha</span>
+                <div className={'mt-3 rounded-2xl p-6 text-white shadow-lg transition-colors '+(win?'bg-gradient-to-br from-emerald to-teal':'bg-gradient-to-br from-red-500 to-rose-600')}>
+                  <div className="text-sm opacity-80">Laba / Rugi bulan ini</div>
+                  <div className="font-display text-3xl font-extrabold mt-1">{rupiah(profit)}</div>
+                  <div className="mt-4 space-y-1.5">
+                    {[['Total pendapatan',rupiah(rev)],['Total biaya',rupiah(totCost)],['Laba per unit',rupiah(margin)],['Titik impas (BEP)',bep?bep+' unit':'∞']].map(([k,v],i)=>(
+                      <div key={i} className="flex justify-between border-b border-white/20 py-1.5 text-sm"><span className="opacity-85">{k}</span><span className="font-semibold">{v}</span></div>
+                    ))}
+                  </div>
+                </div>
+                <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-gold/10 border-l-4 border-gold px-4 py-3 text-sm text-navy-900"><Icon name="bulb" size={18} className="text-gold shrink-0 mt-0.5"/><span>{tip}</span></div>
+              </div>
+            </div>
+          </div>
+        </Reveal>
+      );
+    }
+
+    function Simulasi() {
+      return (
+        <section id="simulasi" className="relative mx-auto max-w-6xl px-5 py-24 scroll-mt-20">
+          <SectionHead pill="Area Simulasi" pillIcon="gauge" title="Belajar Sambil Mencoba"
+            sub="Dua alat interaktif: geser slider untuk memahami keseimbangan pasar, lalu hitung untung-rugi toko online-mu sendiri." />
+          <div className="mt-14 space-y-8">
+            <CurveStudio />
+            <MarketSim />
+          </div>
+        </section>
+      );
+    }
+
+    /* ================= Kuis ================= */
+    function QuizGame() {
+      const [qi,setQi]=useState(0),[score,setScore]=useState(0),[picked,setPicked]=useState(null),[done,setDone]=useState(false);
+      const it = QUIZ_BANK[qi];
+      const pick = (i) => { if (picked!==null) return; setPicked(i); if (i===it.a) setScore(s=>s+1); };
+      const next = () => { if (qi+1<QUIZ_BANK.length){ setQi(qi+1); setPicked(null);} else setDone(true); };
+      const restart = () => { setQi(0); setScore(0); setPicked(null); setDone(false); };
+      if (done) {
+        const pct = score/QUIZ_BANK.length;
+        const msg = pct===1?'Luar biasa! Kamu menguasai materi. 🌟':pct>=0.6?'Bagus! Sedikit lagi sempurna. 👍':'Terus belajar, baca lagi materinya ya. 💪';
+        return (
+          <div className="text-center py-6 anim-scaleIn">
+            <div className="mx-auto grid h-20 w-20 place-items-center rounded-2xl bg-gradient-to-br from-gold to-teal text-navy-950 shadow-lg"><Icon name="award" size={40} stroke={2}/></div>
+            <h3 className="mt-5 font-display text-2xl font-extrabold text-navy-900">Skor kamu: {score} / {QUIZ_BANK.length}</h3>
+            <p className="mt-2 text-navy-800/60">{msg}</p>
+            <button onClick={restart} className="mt-6 cursor-pointer inline-flex items-center gap-2 rounded-full bg-navy-900 px-6 py-3 font-display font-bold text-white hover:bg-navy-800 transition"><Icon name="rotate" size={18} stroke={2.3}/> Ulangi Kuis</button>
+          </div>
+        );
+      }
+      return (
+        <div>
+          <div className="flex items-center justify-between text-sm font-semibold text-navy-800/60"><span>Soal {qi+1} dari {QUIZ_BANK.length}</span><span className="text-teal-deep">Skor {score}</span></div>
+          <div className="mt-2 h-2.5 rounded-full bg-navy-900/10 overflow-hidden"><div className="h-full bg-gradient-to-r from-teal to-emerald transition-all duration-500" style={{width:((qi)/QUIZ_BANK.length*100)+'%'}}></div></div>
+          <p className="mt-6 font-display text-xl font-bold text-navy-900 leading-snug">{it.q}</p>
+          <div className="mt-5 space-y-2.5">
+            {it.o.map((opt,i)=>{
+              let cls='border-navy-900/10 bg-white hover:border-teal/50 hover:bg-teal/[0.03]'; let badge=null;
+              if (picked!==null){
+                if (i===it.a){cls='border-emerald/60 bg-emerald/[0.07]';badge=<span className="text-emerald"><Icon name="checkCircle" size={20} stroke={2.3}/></span>;}
+                else if (i===picked){cls='border-red-300 bg-red-50';badge=<span className="text-red-500"><Icon name="xCircle" size={20} stroke={2.3}/></span>;}
+                else cls='border-navy-900/5 bg-white opacity-55';
+              }
+              return (
+                <button key={i} disabled={picked!==null} onClick={()=>pick(i)} className={'quiz-opt w-full flex items-center justify-between gap-3 rounded-2xl border-2 px-4 py-3.5 text-left text-sm font-medium text-navy-900 disabled:cursor-default cursor-pointer '+cls}>
+                  <span className="flex items-center gap-3"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-navy-900/5 text-xs font-bold">{String.fromCharCode(65+i)}</span>{opt}</span>{badge}
+                </button>
+              );
+            })}
+          </div>
+          {picked!==null && (
+            <div className={'anim-scaleIn mt-4 rounded-2xl p-4 '+(picked===it.a?'bg-emerald/10':'bg-amber-50')}>
+              <div className={'flex items-center gap-2 font-display font-bold '+(picked===it.a?'text-emerald':'text-amber-600')}><Icon name={picked===it.a?'checkCircle':'xCircle'} size={18} stroke={2.4}/>{picked===it.a?'Benar!':'Kurang tepat'}</div>
+              <p className="mt-1.5 text-sm text-navy-800/70">{it.why}</p>
+              <button onClick={next} className="mt-3 cursor-pointer inline-flex items-center gap-1.5 rounded-full bg-navy-900 px-5 py-2 text-sm font-bold text-white hover:bg-navy-800 transition">{qi+1<QUIZ_BANK.length?'Lanjut':'Lihat Hasil'} <Icon name="arrowRight" size={15} stroke={2.4}/></button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function MatchGame() {
+      const [terms] = useState(() => shuffle(PAIRS.map(p=>({id:p.id,t:p.t}))));
+      const [defs] = useState(() => shuffle(PAIRS.map(p=>({id:p.id,d:p.d}))));
+      const [sel, setSel] = useState(null);
+      const [matched, setMatched] = useState([]);
+      const [wrongId, setWrongId] = useState(null);
+      const clickTerm = (id) => { if (matched.includes(id)) return; setSel(id); setWrongId(null); };
+      const clickDef = (id) => {
+        if (matched.includes(id) || sel===null) return;
+        if (sel===id){ setMatched(m=>[...m,id]); setSel(null); }
+        else { setWrongId(id); setTimeout(()=>setWrongId(null),420); }
+      };
+      const allDone = matched.length===PAIRS.length;
+      const reset = () => { setMatched([]); setSel(null); setWrongId(null); };
+      return (
+        <div>
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-navy-800/60">Klik istilah di kiri, lalu klik definisi yang cocok di kanan.</p>
+            <button onClick={reset} className="cursor-pointer inline-flex items-center gap-1.5 text-sm font-semibold text-teal-deep"><Icon name="rotate" size={15} stroke={2.3}/> Ulangi</button>
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-4">
+            <div className="space-y-2.5">
+              {terms.map(t=>{
+                const m = matched.includes(t.id);
+                return <button key={t.id} disabled={m} onClick={()=>clickTerm(t.id)} className={'w-full rounded-xl border-2 px-4 py-3 text-left text-sm font-bold transition cursor-pointer disabled:cursor-default '+(m?'border-emerald/50 bg-emerald/10 text-emerald':sel===t.id?'border-teal bg-teal/10 text-teal-deep scale-[1.02]':'border-navy-900/10 bg-white text-navy-900 hover:border-teal/40')}>{t.t}</button>;
+              })}
+            </div>
+            <div className="space-y-2.5">
+              {defs.map(df=>{
+                const m = matched.includes(df.id);
+                return <button key={df.id} disabled={m} onClick={()=>clickDef(df.id)} className={'w-full rounded-xl border-2 px-4 py-3 text-left text-sm font-medium transition cursor-pointer disabled:cursor-default '+(m?'border-emerald/50 bg-emerald/10 text-emerald':wrongId===df.id?'border-red-400 bg-red-50 text-red-600 shake':'border-navy-900/10 bg-white text-navy-900 hover:border-teal/40')}>{df.d}</button>;
+              })}
+            </div>
+          </div>
+          {allDone && <div className="anim-scaleIn mt-5 rounded-2xl bg-emerald/10 px-5 py-4 text-center font-display font-bold text-emerald">🎉 Sempurna! Semua istilah berhasil dicocokkan.</div>}
+        </div>
+      );
+    }
+
+    function Kuis() {
+      const [tab, setTab] = useState('quiz');
+      return (
+        <section id="kuis" className="relative mx-auto max-w-6xl px-5 py-24 scroll-mt-20">
+          <SectionHead pill="Uji Pemahaman" pillIcon="listCheck" title="Saatnya Tes Dirimu"
+            sub="Kerjakan kuis pilihan ganda, lalu cocokkan istilah ekonomi digital. Semua memberi umpan balik langsung." />
+          <div className="mt-10 max-w-3xl mx-auto">
+            <div className="flex gap-2 p-1.5 rounded-2xl bg-navy-900/5 w-fit mx-auto">
+              {[['quiz','Kuis Pilihan Ganda','target'],['match','Cocokkan Istilah','listCheck']].map(([id,label,ic])=>(
+                <button key={id} onClick={()=>setTab(id)} className={'cursor-pointer inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold transition '+(tab===id?'bg-white text-navy-900 shadow':'text-navy-800/55 hover:text-navy-900')}><Icon name={ic} size={16}/> {label}</button>
+              ))}
+            </div>
+            <Reveal className="mt-6">
+              <div className="rounded-3xl bg-white ring-1 ring-navy-900/5 shadow-xl shadow-navy-900/[0.05] p-7">
+                {tab==='quiz' ? <QuizGame/> : <MatchGame/>}
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      );
+    }
+
+    /* ================= Quiz inside module modal ================= */
+    function ModalQuiz({ quiz, accent }) {
+      const [picked, setPicked] = useState(null);
+      const a = ACCENT[accent];
+      const isCorrect = picked === quiz.answer, answered = picked !== null;
+      return (
+        <div className="mt-2">
+          <div className="flex items-center gap-2 text-sm font-semibold text-navy-900"><span className={'grid h-7 w-7 place-items-center rounded-lg '+a.soft+' '+a.text}><Icon name="bulb" size={16}/></span>Kuis Interaktif</div>
+          <p className="mt-3 font-display text-lg font-bold text-navy-900 leading-snug">{quiz.q}</p>
+          <div className="mt-4 space-y-2.5">
+            {quiz.options.map((opt,i)=>{
+              let cls='border-navy-900/10 bg-white hover:border-teal/50 hover:bg-teal/[0.03]'; let badge=null;
+              if (answered){
+                if (i===quiz.answer){cls='border-emerald/60 bg-emerald/[0.07]';badge=<span className="text-emerald"><Icon name="checkCircle" size={20} stroke={2.3}/></span>;}
+                else if (i===picked){cls='border-red-300 bg-red-50';badge=<span className="text-red-500"><Icon name="xCircle" size={20} stroke={2.3}/></span>;}
+                else cls='border-navy-900/5 bg-white opacity-55';
+              }
+              return (
+                <button key={i} disabled={answered} onClick={()=>setPicked(i)} className={'quiz-opt w-full flex items-center justify-between gap-3 rounded-2xl border-2 px-4 py-3.5 text-left text-sm font-medium text-navy-900 disabled:cursor-default cursor-pointer '+cls}>
+                  <span className="flex items-center gap-3"><span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-navy-900/5 text-xs font-bold text-navy-800">{String.fromCharCode(65+i)}</span>{opt}</span>{badge}
+                </button>
+              );
+            })}
+          </div>
+          {answered && (
+            <div className={'anim-scaleIn mt-4 rounded-2xl p-4 '+(isCorrect?'bg-emerald/10':'bg-amber-50')}>
+              <div className={'flex items-center gap-2 font-display font-bold '+(isCorrect?'text-emerald':'text-amber-600')}><Icon name={isCorrect?'checkCircle':'xCircle'} size={18} stroke={2.4}/>{isCorrect?'Tepat sekali! 🎉':'Belum tepat — coba pahami lagi'}</div>
+              <p className="mt-2 text-sm text-navy-800/70 leading-relaxed">{quiz.why}</p>
+              {!isCorrect && <button onClick={()=>setPicked(null)} className="mt-3 cursor-pointer inline-flex items-center gap-1.5 text-sm font-semibold text-teal-deep hover:gap-2.5 transition-all"><Icon name="rotate" size={15} stroke={2.3}/> Coba lagi</button>}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function Modal({ module, onClose }) {
+      const a = ACCENT[module.accent];
+      useEffect(() => {
+        const onKey = (e) => e.key==='Escape' && onClose();
+        window.addEventListener('keydown', onKey); document.body.style.overflow='hidden';
+        return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow=''; };
+      }, []);
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
+          <div onClick={onClose} className="absolute inset-0 bg-navy-950/60 backdrop-blur-sm anim-scaleIn"></div>
+          <div className="anim-scaleIn relative w-full max-w-lg max-h-[90vh] overflow-y-auto nice-scroll rounded-[1.75rem] bg-ivory shadow-2xl">
+            <div className={'relative overflow-hidden bg-gradient-to-br '+a.grad+' px-7 pt-7 pb-8 text-navy-950'}>
+              <div className="absolute inset-0 opacity-20" style={{backgroundImage:'radial-gradient(circle at 80% 20%, #fff 0, transparent 40%)'}}></div>
+              <button onClick={onClose} aria-label="Tutup" className="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full bg-navy-950/15 text-navy-950 hover:bg-navy-950/25 transition cursor-pointer"><Icon name="x" size={18} stroke={2.5}/></button>
+              <div className="relative flex items-center gap-4">
+                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-navy-950/15"><Icon name={module.icon} size={28} stroke={2.2}/></div>
+                <div><div className="text-xs font-bold uppercase tracking-wider opacity-70">Modul {module.no} · {module.tag}</div><h3 className="font-display text-xl font-extrabold leading-tight mt-0.5">{module.title}</h3></div>
+              </div>
+            </div>
+            <div className="px-7 py-6">
+              <div className="flex items-center gap-2 text-sm font-semibold text-navy-900"><span className={'grid h-7 w-7 place-items-center rounded-lg '+a.soft+' '+a.text}><Icon name="book" size={16}/></span>Penjelasan Singkat</div>
+              <p className="mt-3 text-navy-800/70 leading-relaxed">{module.blurb} Materi ini membantumu memahami konsep inti berikut:</p>
+              <ul className="mt-4 space-y-2.5">
+                {module.points.map((p,i)=>(<li key={i} className="flex items-start gap-3 text-sm text-navy-900"><span className={'mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full '+a.soft+' '+a.text}><Icon name="chevR" size={13} stroke={2.6}/></span>{p}</li>))}
+              </ul>
+              <div className="my-6 h-px bg-gradient-to-r from-transparent via-navy-900/10 to-transparent"></div>
+              <ModalQuiz quiz={module.quiz} accent={module.accent}/>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ================= Footer ================= */
+    function Footer() {
+      return (
+        <footer className="bg-navy-950 text-white/50">
+          <div className="mx-auto max-w-6xl px-5 py-14">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-2.5">
+                <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-teal to-emerald text-navy-950"><Icon name="zap" size={18} stroke={2.4}/></div>
+                <span className="font-display font-extrabold text-white text-lg">EkonomiDigital<span className="text-teal">.id</span></span>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {NAV.map(([id,label])=>(<a key={id} href={'#'+id} className="rounded-full bg-white/5 px-4 py-1.5 text-sm text-white/70 hover:bg-white/10 hover:text-white transition">{label}</a>))}
+              </div>
+            </div>
+            <div className="mt-8 h-px bg-white/10"></div>
+            <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-3 text-sm">
+              <p>Media Pembelajaran Ekonomi Digital — Kurikulum Ekonomi SMA</p>
+              <p className="flex items-center gap-2"><Icon name="cap" size={16}/> Dibuat untuk tugas UAS · © 2026</p>
+            </div>
+          </div>
+        </footer>
+      );
+    }
+
+    /* ================= App ================= */
+    function App() {
+      const [active, setActive] = useState(null);
+      const start = () => document.getElementById('materi')?.scrollIntoView({ behavior:'smooth' });
+      return (
+        <div>
+          <Navbar />
+          <Hero onStart={start} />
+          <main>
+            <Materi onOpen={setActive} />
+            <VideoSection />
+            <Simulasi />
+            <Kuis />
+          </main>
+          <Footer />
+          {active && <Modal module={active} onClose={()=>setActive(null)} />}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
